@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Services Hospitaliers</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/icons/hospital.png') }}">
+
+    <style>
+        .table-bold-centered tbody td {
+            font-weight: bold;
+            text-align: center;
+            vertical-align: middle;
+        }
+        .table-bold-centered thead th {
+            text-align: center;
+            vertical-align: middle;
+        }
+        .service-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .modal-table {
+            width: 100%;
+            margin-top: 20px;
+        }
+        .modal-table th {
+            background-color: #343a40;
+            color: white;
+            text-align: center;
+        }
+        .modal-content {
+            margin: auto;
+        }
+
+
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="service-title">Service dont vous êtes référent</h1>
+
+        {% if services %}
+            <table class="table table-bordered table-striped table-bold-centered">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>ID SERVICE</th>
+                        <th>NOM DU SERVICE</th>
+                        <th>MÉDECIN RÉFÉRENT</th>
+                        <th>RESPONSABLE ADMINISTRATIF</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in services %}
+                    <tr>
+                        <td>{{ s.id }}</td>
+                        <td>{{ s.service_nom }}</td>
+                        <td>
+                            {{ s.medecin_prenom }} {{ s.medecin_nom }} (ID: {{ s.medecin_id }})
+                        </td>
+                        <td>
+                            {% if s.admin_nom %}
+                                {{ s.admin_prenom }} {{ s.admin_nom }} (ID: {{ s.admin_id }})
+                            {% else %}
+                                Non assigné
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="action-buttons">
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#personnelModal">
+                    Personnel du service
+                </button>
+
+                <!-- Bouton Patients de Service  -->
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#patientsModal">
+                    Patients de service
+                </button>
+            </div>
+
+            <!-- Modal Personnel -->
+            <div class="modal fade" id="personnelModal" tabindex="-1" role="dialog" aria-labelledby="personnelModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="personnelModalLabel">Personnel du service</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h4>MÉDECINS</h4>
+                                    <table class="table table-bordered modal-table">
+                                        <thead class="thead-dark">
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>NOM</th>
+                                                <th>PRÉNOM</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for medecin in personnel_service.medecins %}
+                                            <tr>
+                                                <td>{{ medecin.id }}</td>
+                                                <td>{{ medecin.nom }}</td>
+                                                <td>{{ medecin.prenom }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <h4>INFIRMIERS</h4>
+                                    <table class="table table-bordered modal-table">
+                                        <thead class="thead-dark">
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>NOM</th>
+                                                <th>PRÉNOM</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for infirmier in personnel_service.infirmiers %}
+                                            <tr>
+                                                <td>{{ infirmier.id }}</td>
+                                                <td>{{ infirmier.nom }}</td>
+                                                <td>{{ infirmier.prenom }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+          <!-- Modal Patients -->
+<div class="modal fade" id="patientsModal" tabindex="-1" role="dialog" aria-labelledby="patientsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="patientsModalLabel">Patients du service</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered modal-table">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>NOM</th>
+                                <th>PRÉNOM</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for patient in personnel_service.patients %}
+                            <tr>
+                                <td>{{ patient.id }}</td>
+                                <td>{{ patient.nom }}</td>
+                                <td>{{ patient.prenom }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="3" class="text-center">Aucun patient dans ce service</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+        {% else %}
+            <div class="alert alert-info text-center">
+                Vous n'êtes référent d'aucun service pour l'instant.
+            </div>
+        {% endif %}
+
+        <div class="text-center mt-4">
+            <a href="{{ url_for('medecin') }}" class="btn btn-primary">Retour</a>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('#personnelModal').on('shown.bs.modal', function () {
+                console.log("Modal affiché avec succès !");
+            });
+        });
+    </script>
+</body>
+</html>

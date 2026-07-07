@@ -1,0 +1,452 @@
+
+
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestion des Patients</title>
+    <link rel="stylesheet" href="static/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/icons/patient.png') }}">
+
+</head>
+<body>
+    <div class="header">
+        <h1><i class="fas fa-user-injured"></i> Gestion des Patients</h1>
+        <button class="btn btn-add" onclick="openModal('add')">
+            <i class="fas fa-plus"></i> Ajouter Patient
+        </button>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th><th>Nom</th><th>Prénom</th><th>Date de Naissance</th>
+                <th>Sexe</th><th>Adresse</th><th>Téléphone</th>
+                <th>Antécédents</th><th>Raison Hospitalisation</th><th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for patient in patients %}
+            <tr>
+                <td>{{ patient.id }}</td>
+                <td>{{ patient.nom }}</td>
+                <td>{{ patient.prenom }}</td>
+                <td>{{ patient.date_naissance }}</td>
+                <td>{{ patient.sexe }}</td>
+                <td>{{ patient.adresse }}</td>
+                <td>{{ patient.telephone }}</td>
+                <td>{{ patient.antecedents or '' }}</td>
+                <td>{{ patient.raison_hospitalisation }}</td>
+                <td class="action-btns">
+                    <button class="btn btn-edit" onclick="openModal('edit', {{ patient.id }})">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-delete" onclick="confirmDelete({{ patient.id }})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    <button class="btn btn-action" onclick="showVisites({{ patient.id }})">Visites</button>
+                    <button class="btn btn-action" onclick="showSoins({{ patient.id }})">Soins</button>
+                    <button class="btn btn-action" onclick="showSejours({{ patient.id }})">Séjours</button>
+                    <button class="btn btn-action" onclick="showMedicaments({{ patient.id }})">
+                        <i class="fas fa-pills"></i> Médicaments
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Modal pour info visites/soins/séjours -->
+    <div id="infoModal" class="modal">
+        <div class="modal-content">
+            <h2 id="infoTitle">Titre</h2>
+            <div id="infoBody" style="margin-top: 20px;"></div>
+            <div class="modal-btns" style="margin-top: 20px;">
+                <button class="btn" onclick="closeInfoModal()">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Ajout/Modification Patient -->
+    <div id="patientModal" class="modal">
+        <div class="modal-content">
+            <h2 id="modalTitle">Ajouter Patient</h2>
+            <form id="patientForm" method="POST">
+                <input type="hidden" id="patientId" name="id" />
+                <label>Nom : <input type="text" id="nom" name="nom" required /></label>
+                <label>Prénom : <input type="text" id="prenom" name="prenom" required /></label>
+                <label>Date de naissance : <input type="date" id="date_naissance" name="date_naissance" required /></label>
+                <label>Sexe :
+                    <select id="sexe" name="sexe" required>
+                        <option value="Homme">Homme</option>
+                        <option value="Femme">Femme</option>
+                    </select>
+                </label>
+                <label>Adresse : <input type="text" id="adresse" name="adresse" required /></label>
+                <label>Téléphone : <input type="tel" id="telephone" name="telephone" required /></label>
+                <label>Antécédents : <input type="text" id="antecedents" name="antecedents" /></label>
+                <label>Raison hospitalisation : <input type="text" id="raison" name="raison" required /></label>
+
+                <div style="margin-top: 20px;">
+                    <button type="submit" class="btn btn-add">Enregistrer</button>
+                    <button type="button" class="btn" onclick="closeModal()">Annuler</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Ajout Visite -->
+    <div id="visiteModal" class="modal">
+        <div class="modal-content">
+            <h2>Ajouter une Visite</h2>
+            <form id="visiteForm" method="POST" action="/ajouter_visite">
+                <input type="hidden" id="visitePatientId" name="patient_id" />
+
+                <label>Médecin ID : <input type="number" id="medecin_id" name="medecin_id" required /></label>
+                <label>Date : <input type="date" id="date_visite" name="date_visite" required /></label>
+                <label>Examens : <input type="text" id="examens" name="examens" required /></label>
+                <label>Commentaire : <textarea id="commentaire" name="commentaire" required style="height: 150px; width: 500px;"></textarea></label>
+
+                <div style="margin-top: 20px;">
+                    <button type="submit" class="btn btn-add">Enregistrer</button>
+                    <button type="button" class="btn" onclick="closeVisiteModal()">Annuler</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Médicaments -->
+    <div id="medicamentsModal" class="modal">
+        <div class="modal-content">
+            <h2 id="medicamentsTitle">Médicaments du Patient</h2>
+            <div id="medicamentsBody" style="margin-top: 20px;">
+                <table class="info-table">
+                    <thead>
+                        <tr>
+                            <th>Médicament</th>
+                            <th>Quantité</th>
+                        </tr>
+                    </thead>
+                    <tbody id="medicaments-list">
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-btns" style="margin-top: 20px;">
+                <button class="btn" onclick="closeMedicamentsModal()">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // Fonction pour ouvrir le modal d'ajout/modification
+    function openModal(action, id = null) {
+        const modal = document.getElementById('patientModal');
+        const form = document.getElementById('patientForm');
+        
+        form.reset();
+        
+        if (action === 'edit' && id) {
+            document.getElementById('modalTitle').textContent = "Modifier Patient";
+            
+            // Simulation de données - À remplacer par un appel API réel
+            fetch('/get_patient/' + id)
+                .then(response => response.json())
+                .then(patient => {
+                    document.getElementById('patientId').value = patient.id;
+                    document.getElementById('nom').value = patient.nom;
+                    document.getElementById('prenom').value = patient.prenom;
+                    document.getElementById('date_naissance').value = patient.date_naissance;
+                    document.getElementById('sexe').value = patient.sexe;
+                    document.getElementById('adresse').value = patient.adresse;
+                    document.getElementById('telephone').value = patient.telephone;
+                    document.getElementById('antecedents').value = patient.antecedents || '';
+                    document.getElementById('raison').value = patient.raison_hospitalisation;
+                    
+                    // Changer l'action du formulaire pour la modification
+                    form.action = '/modifier_patient';
+                    modal.style.display = 'flex';
+                });
+        } else {
+            document.getElementById('modalTitle').textContent = "Ajouter Patient";
+            document.getElementById('patientId').value = "";
+            
+            // Changer l'action du formulaire pour l'ajout
+            form.action = '/ajouter_patient';
+            modal.style.display = 'flex';
+        }
+    }
+
+    function closeModal() {
+        document.getElementById('patientModal').style.display = 'none';
+    }
+
+    // Gestion de la soumission du formulaire patient
+    document.getElementById('patientForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        
+        fetch(this.action, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (response.redirected) {
+                window.location.href = response.url;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    });
+
+    function confirmDelete(id) {
+        if (confirm('Supprimer patient #' + id + '?')) {
+            fetch('/supprimer_patient/' + id, {
+                method: 'DELETE'
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.reload();
+                }
+            });
+        }
+    }
+
+    function showInfo(title, contentHtml) {
+        document.getElementById('infoTitle').textContent = title;
+        document.getElementById('infoBody').innerHTML = contentHtml;
+        document.getElementById('infoModal').style.display = 'flex';
+    }
+
+    function closeInfoModal() {
+        document.getElementById('infoModal').style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+        const infoModal = document.getElementById('infoModal');
+        const patientModal = document.getElementById('patientModal');
+        const visiteModal = document.getElementById('visiteModal');
+        
+        if (event.target === infoModal) closeInfoModal();
+        if (event.target === patientModal) closeModal();
+        if (event.target === visiteModal) closeVisiteModal();
+    }
+
+    // Fonctions pour afficher les visites, soins et séjours
+    function showVisites(id) {
+    fetch('/visites/patient/' + id)
+        .then(response => response.json())
+        .then(visites => {
+            let html = `
+            <table class="info-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Médecin ID</th>
+                        <th>Date</th>
+                        <th>Examens</th>
+                        <th>Commentaire</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+
+            visites.forEach(v => {
+                html += `
+                    <tr>
+                        <td>${v.id}</td>
+                        <td>${v.medecin_id}</td>
+                        <td>${v.date_visite}</td>
+                        <td>${v.examens_pratiques}</td>
+                        <td>${v.commentaire}</td>
+                    </tr>`;
+            });
+
+            html += `</tbody></table>
+            <div style="margin-top: 15px; text-align: right;">
+                <button class="btn btn-add" onclick="ajouterVisite(${id})">
+                    <i class="fas fa-plus"></i> Ajouter une visite
+                </button>
+            </div>`;
+
+            showInfo('Visites Médicales - Patient #' + id, html);
+        })
+        .catch(error => {
+            console.error('Erreur lors du chargement des visites:', error);
+        });
+}
+
+
+function showSoins(id) {
+    fetch('/api/soins/' + id)
+        .then(response => response.json())
+        .then(soins => {
+            let html = `
+            <table class="info-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Infirmier ID</th>
+                        <th>Date</th>
+                        <th>Heure</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+            
+            soins.forEach(s => {
+                html += `
+                    <tr>
+                        <td>${s.id}</td>
+                        <td>${s.infirmier_id}</td>
+                        <td>${s.date_soin}</td>
+                        <td>${s.heure_soin}</td>
+                        <td>${s.description}</td>
+                    </tr>`;
+            });
+            
+            html += `</tbody></table>
+            `;
+
+            showInfo('Soins - Patient #' + id, html);
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            alert('Impossible de récupérer les soins du patient.');
+        });
+}
+
+
+function showSejours(id) {
+    fetch('/api/sejours/' + id)
+        .then(response => response.json())
+        .then(sejours => {
+            let html = `
+            <table class="info-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Lit ID</th>
+                        <th>Date Arrivée</th>
+                        <th>Date Sortie Prévue</th>
+                        <th>Date Sortie Réelle</th>
+                        <th>Employé Admin ID</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+            
+            sejours.forEach(s => {
+                html += `
+                    <tr>
+                        <td>${s.id}</td>
+                        <td>${s.lit_id}</td>
+                        <td>${s.date_arrivee}</td>
+                        <td>${s.date_sortie_prevue}</td>
+                        <td>${s.date_sortie_reelle}</td>
+                        <td>${s.employe_admin_id}</td>
+                    </tr>`;
+            });
+            
+            html += `</tbody></table>
+           `;
+
+            showInfo('Séjours - Patient #' + id, html);
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            alert('Impossible de récupérer les séjours du patient.');
+        });
+}
+
+
+    function ajouterVisite(patientId) {
+        document.getElementById('visitePatientId').value = patientId;
+        const visiteModal = document.getElementById('visiteModal');
+        visiteModal.style.display = 'flex';
+    }
+
+    function closeVisiteModal() {
+        document.getElementById('visiteModal').style.display = 'none';
+    }
+
+    // Gestion de la soumission du formulaire de visite
+    document.getElementById('visiteForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        
+        fetch(this.action, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (response.ok) {
+                closeVisiteModal();
+                alert('Visite ajoutée avec succès!');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    });
+
+    function showMedicaments(id) {
+        fetch('/api/medicaments/' + id)
+            .then(response => response.json())
+            .then(medicaments => {
+                let html = '';
+                
+                if (medicaments.length > 0) {
+                    medicaments.forEach(m => {
+                        html += `
+                            <tr>
+                                <td>${m.nom}</td>
+                                <td>${m.quantite}</td>
+                            </tr>`;
+                    });
+                } else {
+                    html = '<tr><td colspan="2">Aucun médicament prescrit</td></tr>';
+                }
+                
+                document.getElementById('medicaments-list').innerHTML = html;
+                document.getElementById('medicamentsTitle').textContent = 
+                    `Médicaments - Patient #${id}`;
+                document.getElementById('medicamentsModal').style.display = 'flex';
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                alert('Impossible de récupérer les médicaments du patient.');
+            });
+    }
+
+    function closeMedicamentsModal() {
+        document.getElementById('medicamentsModal').style.display = 'none';
+    }
+
+    // Modifiez la gestion des clics en dehors du modal
+    window.onclick = function(event) {
+        const infoModal = document.getElementById('infoModal');
+        const patientModal = document.getElementById('patientModal');
+        const visiteModal = document.getElementById('visiteModal');
+        const medicamentsModal = document.getElementById('medicamentsModal');
+        
+        if (event.target === infoModal) closeInfoModal();
+        if (event.target === patientModal) closeModal();
+        if (event.target === visiteModal) closeVisiteModal();
+        if (event.target === medicamentsModal) closeMedicamentsModal();
+    }
+
+    </script>
+  
+</div>
+
+<div class="text-center mt-5">
+    <a href="{{ url_for('medecin') }}" class="btn btn-primary">Retour</a>
+</div>
+</body>
+</html>
+ 

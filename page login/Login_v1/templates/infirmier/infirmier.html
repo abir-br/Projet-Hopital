@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau de Bord Infirmier</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f4f8;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .card h2 {
+            color: #2c3e50;
+            margin-top: 0;
+            font-size: 1.4rem;
+        }
+        
+        .card i {
+            font-size: 2.5rem;
+            color: #3498db;
+            margin-bottom: 15px;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <h1>Tableau de Bord Infirmier</h1>
+    
+    <div class="container">
+        <div class="card" onclick="window.location.href='/infirmier/soins';">
+            <i class="fas fa-pills"></i>
+            <h2>Mes Soins</h2>
+        </div>
+        
+        <div class="card" onclick="window.location.href='/infirmier/patients';">
+            <i class="fas fa-user-injured"></i>
+            <h2>Mes Patients</h2>
+        </div>
+        
+        <div class="card" onclick="window.location.href='/infirmier/medicaments';">
+            <i class="fas fa-pills"></i>
+            <h2>Gestion des Médicaments</h2>
+        </div>
+        
+        <div class="card" onclick="window.location.href='/infirmier/reunions';">
+            <i class="fas fa-users"></i>
+            <h2>Mes Réunions</h2>
+        </div>
+    </div>
+</body>
+</html>

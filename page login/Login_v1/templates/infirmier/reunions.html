@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Mes Réunions Médicales</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/icons/people.png') }}">
+
+    <style>
+        .table th {
+            text-transform: none !important;
+        }
+
+        .table-bold tbody td {
+            font-weight: bold;
+        }
+
+        .table-centered td,
+        .table-centered th {
+            text-align: center;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Mes Réunions Médicales</h1>
+
+        {% if reunions %}
+        <div class="table-responsive">
+            <table class="table table-striped table-centered table-bold">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Date de la réunion</th>
+                        <th>Heure de la réunion</th>
+                        <th>Participants</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for reunion in reunions %}
+                    <tr>
+                        <td>{{ reunion.id }}</td>
+                        <td>{{ reunion.date_reunion }}</td>
+                        <td>{{ reunion.heure_reunion }}</td>
+                        <td>
+                            {% if reunion.participants %}
+                                {% for participant in reunion.participants %}
+                                    {{ participant.nom }} {{ participant.prenom }}{% if not loop.last %}, {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                Aucun
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <p class="text-center text-muted">Aucune réunion trouvée.</p>
+        {% endif %}
+
+        <div class="text-center mt-4">
+            <a href="{{ url_for('infirmier') }}" class="btn btn-secondary">Retour</a>
+        </div>
+    </div>
+</body>
+</html>
