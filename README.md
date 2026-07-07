@@ -9,22 +9,21 @@ Application web de gestion hospitalière développée avec **Flask** et **SQLite
 ```
 Projet-Hopital/
 ├── bdd/
-│   └── hopital.db                  # Base de données SQLite principale (schéma complet)
-└── page login/
+│   └── hopital.db                 
     └── Login_v1/
-        ├── app.py                  # Application Flask (routes, logique métier)
-        ├── requirements.txt        # Dépendances Python
-        ├── setup.bat               # Script d'installation/lancement (Windows)
-        ├── database.db             # Base de données locale (données de test)
+        ├── app.py                 
+        ├── requirements.txt        
+        ├── setup.bat               
+        ├── database.db             
         ├── votre_base_de_donnees.db
         ├── static/
-        │   ├── css/                # Feuilles de style (main, styles, util)
-        │   ├── js/                 # Scripts JS (main.js)
-        │   ├── images/             # Icônes et images (patient, pills, hospital...)
-        │   ├── fonts/              # Polices (Montserrat, Poppins, Font Awesome)
-        │   └── vendor/             # Librairies tierces (Bootstrap, jQuery, Select2, Animate, Tilt)
+        │   ├── css/                
+        │   ├── js/                 
+        │   ├── images/             
+        │   ├── fonts/             
+        │   └── vendor/             
         └── templates/
-            ├── index.html          # Page de connexion
+            ├── index.html          
             ├── medecin/
             │   ├── medecin.html
             │   ├── patients.html
