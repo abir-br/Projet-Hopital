@@ -122,4 +122,3 @@ setup.bat
 python app.py
 ```
 
-L'application est accessible sur `http://127.0.0.1:5000/`.
